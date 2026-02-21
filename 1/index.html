@@ -26,8 +26,11 @@
       <canvas id="gameCanvas" width="900" height="600" aria-label="Wife Project game"></canvas>
 
       <div id="mobileControls" aria-hidden="true">
-        <div id="joystickBase">
-          <div id="joystickStick"></div>
+        <div id="dpad" aria-label="이동 방향 버튼">
+          <button class="dir-btn up" type="button" data-dir="up">▲</button>
+          <button class="dir-btn left" type="button" data-dir="left">◀</button>
+          <button class="dir-btn right" type="button" data-dir="right">▶</button>
+          <button class="dir-btn down" type="button" data-dir="down">▼</button>
         </div>
         <button id="messBtn" type="button">어지르기</button>
       </div>
@@ -38,7 +41,7 @@
         <h1>Wife Project</h1>
         <p>가상 스텔스 시뮬레이션: 들키기 전에 모든 오브젝트를 어질러 보세요.</p>
         <ul>
-          <li>이동: WASD / 모바일 조이스틱</li>
+          <li>이동: WASD / 모바일 화살표 버튼</li>
           <li>상호작용: E / 어지르기 버튼</li>
           <li>아내에게 발각되거나 가까이 붙으면 게임 오버</li>
         </ul>

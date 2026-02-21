@@ -23,6 +23,7 @@ body {
 
 body {
   background: radial-gradient(circle at 25% 20%, var(--bg-2), var(--bg-1) 70%);
+  overscroll-behavior: none;
 }
 
 #app {
@@ -112,6 +113,12 @@ body {
   touch-action: none;
 }
 
+#gameArea,
+#mobileControls,
+#mobileControls button {
+  touch-action: none;
+}
+
 #warningFlash {
   position: absolute;
   inset: 0;
@@ -131,33 +138,57 @@ body {
   pointer-events: none;
 }
 
-#joystickBase,
+#dpad,
 #messBtn {
   pointer-events: auto;
 }
 
-#joystickBase {
+#dpad {
   position: absolute;
   left: 18px;
   bottom: 16px;
-  width: 132px;
-  height: 132px;
-  border-radius: 50%;
-  background: rgba(25, 38, 48, 0.35);
-  border: 2px solid rgba(255, 255, 255, 0.7);
+  width: 166px;
+  height: 166px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
 }
 
-#joystickStick {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 62px;
-  height: 62px;
-  margin-left: -31px;
-  margin-top: -31px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #344552;
+.dir-btn {
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(25, 38, 48, 0.62);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+  border-radius: 14px;
+  padding: 0;
+}
+
+.dir-btn:active,
+.dir-btn.active {
+  transform: scale(0.96);
+  background: rgba(60, 96, 120, 0.9);
+}
+
+.dir-btn.up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dir-btn.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dir-btn.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dir-btn.down {
+  grid-column: 2;
+  grid-row: 3;
 }
 
 #messBtn {
@@ -242,18 +273,16 @@ body {
     bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
-  #joystickBase {
-    width: 124px;
-    height: 124px;
+  #dpad {
+    width: 152px;
+    height: 152px;
     left: 14px;
     bottom: calc(10px + env(safe-area-inset-bottom));
   }
 
-  #joystickStick {
-    width: 58px;
-    height: 58px;
-    margin-left: -29px;
-    margin-top: -29px;
+  .dir-btn {
+    font-size: 22px;
+    border-radius: 12px;
   }
 }
 

@@ -47,8 +47,7 @@
   const restartBtn2 = document.getElementById("restartBtn2");
   const copyBtn = document.getElementById("copyBtn");
 
-  const joystickBase = document.getElementById("joystickBase");
-  const joystickStick = document.getElementById("joystickStick");
+  const dpadButtons = Array.from(document.querySelectorAll(".dir-btn"));
   const messBtn = document.getElementById("messBtn");
 
   const map = {
@@ -124,13 +123,11 @@
   const keys = Object.create(null);
   let interactPressed = false;
 
-  const touch = {
-    active: false,
-    pointerId: null,
-    centerX: 0,
-    centerY: 0,
-    dx: 0,
-    dy: 0,
+  const touchMove = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
   };
 
   const audio = {
@@ -376,9 +373,11 @@
     if (keys.KeyA) ix -= 1;
     if (keys.KeyD) ix += 1;
 
-    if (touch.active) {
-      ix = touch.dx;
-      iy = touch.dy;
+    if (RUNTIME.isMobile) {
+      if (touchMove.up) iy -= 1;
+      if (touchMove.down) iy += 1;
+      if (touchMove.left) ix -= 1;
+      if (touchMove.right) ix += 1;
     }
 
     const vec = normalize(ix, iy);
@@ -728,7 +727,7 @@
     ctx.fillRect(10, canvas.height - 34, 250, 24);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 13px Trebuchet MS";
-    ctx.fillText("모바일 확대 모드 ON", 18, canvas.height - 18);
+    ctx.fillText("모바일 확대 + 화살표 이동", 18, canvas.height - 18);
   }
 
   function updateWarning(dt) {
@@ -805,57 +804,33 @@
   }
 
   function setupTouchControls() {
-    joystickBase.addEventListener("pointerdown", (e) => {
-      touch.active = true;
-      touch.pointerId = e.pointerId;
+    for (const btn of dpadButtons) {
+      const dir = btn.dataset.dir;
+      if (!dir || !(dir in touchMove)) continue;
 
-      const rect = joystickBase.getBoundingClientRect();
-      touch.centerX = rect.left + rect.width / 2;
-      touch.centerY = rect.top + rect.height / 2;
-      updateTouchVector(e.clientX, e.clientY);
+      const activate = (e) => {
+        e.preventDefault();
+        touchMove[dir] = true;
+        btn.classList.add("active");
+        ensureAudioContext();
+      };
+      const deactivate = (e) => {
+        e.preventDefault();
+        touchMove[dir] = false;
+        btn.classList.remove("active");
+      };
 
-      joystickBase.setPointerCapture(e.pointerId);
-      ensureAudioContext();
-    });
+      btn.addEventListener("pointerdown", activate);
+      btn.addEventListener("pointerup", deactivate);
+      btn.addEventListener("pointercancel", deactivate);
+      btn.addEventListener("pointerleave", deactivate);
+    }
 
-    joystickBase.addEventListener("pointermove", (e) => {
-      if (!touch.active || e.pointerId !== touch.pointerId) return;
-      updateTouchVector(e.clientX, e.clientY);
-    });
-
-    const stopTouch = (e) => {
-      if (!touch.active || e.pointerId !== touch.pointerId) return;
-      touch.active = false;
-      touch.pointerId = null;
-      touch.dx = 0;
-      touch.dy = 0;
-      joystickStick.style.transform = "translate(0px, 0px)";
-    };
-
-    joystickBase.addEventListener("pointerup", stopTouch);
-    joystickBase.addEventListener("pointercancel", stopTouch);
-
-    messBtn.addEventListener("pointerdown", () => {
+    messBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
       interactPressed = true;
       ensureAudioContext();
     });
-  }
-
-  function updateTouchVector(clientX, clientY) {
-    const dx = clientX - touch.centerX;
-    const dy = clientY - touch.centerY;
-    const max = RUNTIME.isMobile ? 50 : 42;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    let clampedX = dx;
-    let clampedY = dy;
-    if (len > max) {
-      clampedX = (dx / len) * max;
-      clampedY = (dy / len) * max;
-    }
-
-    touch.dx = clampedX / max;
-    touch.dy = clampedY / max;
-    joystickStick.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
   }
 
   function setupUI() {
