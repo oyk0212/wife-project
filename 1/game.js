@@ -26,22 +26,6 @@
     },
   };
 
-  const FINAL_CHALLENGE = {
-    zone: { x: 20, y: 360, w: 860, h: 220 },
-    start: { x: 70, y: 555 },
-    wifeStart: { x: 70, y: 405 },
-    goal: { x: 845, y: 405, r: 18 },
-    walls: [
-      { x: 150, y: 380, w: 20, h: 150 },
-      { x: 250, y: 430, w: 20, h: 150 },
-      { x: 350, y: 380, w: 20, h: 150 },
-      { x: 450, y: 430, w: 20, h: 150 },
-      { x: 550, y: 380, w: 20, h: 150 },
-      { x: 650, y: 430, w: 20, h: 150 },
-      { x: 750, y: 380, w: 20, h: 150 },
-    ],
-  };
-
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -129,7 +113,6 @@
     angry: 0,
     messyCount: 0,
     totalObjects: 0,
-    finalMode: false,
     flashTimer: 0,
     lastTime: 0,
   };
@@ -198,7 +181,6 @@
     game.win = false;
     game.angry = 0;
     game.messyCount = 0;
-    game.finalMode = false;
     game.flashTimer = 0;
     game.lastTime = 0;
     RUNTIME.camera.x = player.x;
@@ -242,27 +224,6 @@
     setTimeout(() => beep(760, 0.12, "sine"), 90);
   }
 
-  function startFinalChallenge() {
-    if (game.finalMode) return;
-
-    game.finalMode = true;
-    game.angry = 100;
-    wife.state = "chase";
-    wife.scanTimer = 0;
-    wife.burstTimer = 0;
-    wife.lostSightTimer = 0;
-    game.flashTimer = 0.5;
-
-    player.x = FINAL_CHALLENGE.start.x;
-    player.y = FINAL_CHALLENGE.start.y;
-    wife.x = FINAL_CHALLENGE.wifeStart.x;
-    wife.y = FINAL_CHALLENGE.wifeStart.y;
-
-    beep(220, 0.12, "sawtooth");
-    setTimeout(() => beep(180, 0.12, "sawtooth"), 80);
-    updateHud();
-  }
-
   function updateHud() {
     angryBar.style.width = `${game.angry}%`;
     angryValue.textContent = `${Math.round(game.angry)}`;
@@ -276,8 +237,7 @@
     const speedUnit = CONFIG.wife.baseSpeed + (game.angry / 100) * 2.0;
     const burst = wife.burstTimer > 0 ? 1.25 : 1.0;
     const mobileAssist = RUNTIME.isMobile ? 0.9 : 1.0;
-    const finalBoost = game.finalMode ? 1.55 : 1.0;
-    return speedUnit * 60 * burst * mobileAssist * finalBoost;
+    return speedUnit * 60 * burst * mobileAssist;
   }
 
   function getVisionRadius() {
@@ -377,17 +337,12 @@
     );
   }
 
-  function getActiveWalls() {
-    return game.finalMode ? map.walls.concat(FINAL_CHALLENGE.walls) : map.walls;
-  }
-
   function moveWithCollision(entity, dx, dy) {
-    const walls = getActiveWalls();
     const nextX = entity.x + dx;
     const nextY = entity.y + dy;
 
     entity.x = nextX;
-    for (const wall of walls) {
+    for (const wall of map.walls) {
       if (circleRectOverlap(entity.x, entity.y, entity.radius, wall)) {
         entity.x -= dx;
         break;
@@ -395,7 +350,7 @@
     }
 
     entity.y = nextY;
-    for (const wall of walls) {
+    for (const wall of map.walls) {
       if (circleRectOverlap(entity.x, entity.y, entity.radius, wall)) {
         entity.y -= dy;
         break;
@@ -438,7 +393,7 @@
   function hasLineOfSight(from, to) {
     const p1 = { x: from.x, y: from.y };
     const p2 = { x: to.x, y: to.y };
-    for (const wall of getActiveWalls()) {
+    for (const wall of map.walls) {
       if (segmentIntersectsRect(p1, p2, wall)) {
         return false;
       }
@@ -463,40 +418,35 @@
   }
 
   function updateWife(dt) {
-    if (!game.finalMode) {
-      wife.scanTimer += dt;
-      if (wife.scanTimer >= getScanInterval()) {
-        wife.scanTimer = 0;
-        wife.burstTimer = 0.45;
-        if (wife.state === "patrol") {
-          wife.waypointIndex = (wife.waypointIndex + 1) % patrolWaypoints.length;
-        }
+    wife.scanTimer += dt;
+    if (wife.scanTimer >= getScanInterval()) {
+      wife.scanTimer = 0;
+      wife.burstTimer = 0.45;
+      if (wife.state === "patrol") {
+        wife.waypointIndex = (wife.waypointIndex + 1) % patrolWaypoints.length;
       }
-      wife.burstTimer = Math.max(0, wife.burstTimer - dt);
+    }
+    wife.burstTimer = Math.max(0, wife.burstTimer - dt);
 
-      const seesPlayer = canSeePlayer();
+    const seesPlayer = canSeePlayer();
 
-      if (seesPlayer) {
-        if (wife.state !== "chase") {
-          game.flashTimer = 0.35;
-          beep(260, 0.1, "square");
-        }
-        wife.state = "chase";
-        wife.lostSightTimer = 0;
-      } else if (wife.state === "chase") {
-        wife.lostSightTimer += dt;
-        if (wife.lostSightTimer >= CONFIG.wife.chaseLoseTime) {
-          wife.state = "patrol";
-          wife.waypointIndex = findClosestWaypoint(wife.x, wife.y);
-        }
+    if (seesPlayer) {
+      if (wife.state !== "chase") {
+        game.flashTimer = 0.35;
+        beep(260, 0.1, "square");
       }
-    } else {
       wife.state = "chase";
       wife.lostSightTimer = 0;
+    } else if (wife.state === "chase") {
+      wife.lostSightTimer += dt;
+      if (wife.lostSightTimer >= CONFIG.wife.chaseLoseTime) {
+        wife.state = "patrol";
+        wife.waypointIndex = findClosestWaypoint(wife.x, wife.y);
+      }
     }
 
     let target;
-    if (wife.state === "chase" || game.finalMode) {
+    if (wife.state === "chase") {
       target = { x: player.x, y: player.y };
     } else {
       target = patrolWaypoints[wife.waypointIndex];
@@ -625,36 +575,6 @@
     for (const door of map.doors) {
       ctx.fillRect(door.x, door.y, door.w, door.h);
     }
-
-    if (game.finalMode) {
-      drawFinalChallenge();
-    }
-  }
-
-  function drawFinalChallenge() {
-    const zone = FINAL_CHALLENGE.zone;
-
-    ctx.fillStyle = "rgba(25, 28, 35, 0.22)";
-    ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
-
-    ctx.fillStyle = "rgba(67, 74, 86, 0.96)";
-    for (const wall of FINAL_CHALLENGE.walls) {
-      ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-    }
-
-    const pulse = 0.7 + Math.sin(performance.now() * 0.01) * 0.2;
-    ctx.beginPath();
-    ctx.arc(FINAL_CHALLENGE.goal.x, FINAL_CHALLENGE.goal.y, FINAL_CHALLENGE.goal.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 215, 64, ${pulse})`;
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#8b6b00";
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(20, 20, 20, 0.8)";
-    ctx.font = "bold 13px Trebuchet MS";
-    ctx.fillText("FINAL MAZE", 28, 378);
-    ctx.fillText("GOAL", FINAL_CHALLENGE.goal.x - 18, FINAL_CHALLENGE.goal.y - 26);
   }
 
   function drawObjects() {
@@ -694,7 +614,7 @@
   }
 
   function drawWife() {
-    const radius = game.finalMode ? 160 : getVisionRadius();
+    const radius = getVisionRadius();
     const angle = (getVisionAngleDeg() * Math.PI) / 180;
     const facingAngle = Math.atan2(wife.facing.y, wife.facing.x);
 
@@ -729,7 +649,7 @@
   }
 
   function drawInteractionHint() {
-    if (!game.started || game.ended || game.finalMode) return;
+    if (!game.started || game.ended) return;
 
     let hasNearby = false;
     const interactionRadius = getInteractionRadius();
@@ -820,13 +740,15 @@
 
     if (game.started && !game.ended) {
       updatePlayer(dt);
-      updateWife(dt);
-      updateObjects(dt);
-      updateParticles(dt);
-      updateCamera(dt);
       if (interactPressed) {
         tryInteract();
         interactPressed = false;
+      }
+      if (!game.ended) {
+        updateWife(dt);
+        updateObjects(dt);
+        updateParticles(dt);
+        updateCamera(dt);
       }
     }
 
