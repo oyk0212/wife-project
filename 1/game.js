@@ -151,20 +151,20 @@
 
   function initObjects() {
     objects = [
-      { id: "obj1", name: "쿠션", x: 95, y: 170, room: "거실" },
-      { id: "obj2", name: "책", x: 230, y: 230, room: "거실" },
-      { id: "obj3", name: "장난감", x: 150, y: 390, room: "거실" },
-      { id: "obj4", name: "리모컨", x: 240, y: 500, room: "거실" },
-      { id: "obj5", name: "컵", x: 390, y: 120, room: "주방" },
-      { id: "obj6", name: "접시", x: 520, y: 170, room: "주방" },
-      { id: "obj7", name: "수건", x: 370, y: 290, room: "주방" },
-      { id: "obj8", name: "빨래", x: 520, y: 420, room: "주방" },
-      { id: "obj9", name: "머그", x: 450, y: 520, room: "주방" },
-      { id: "obj10", name: "베개", x: 700, y: 130, room: "침실" },
-      { id: "obj11", name: "양말", x: 820, y: 210, room: "침실" },
-      { id: "obj12", name: "잡지", x: 760, y: 350, room: "침실" },
-      { id: "obj13", name: "셔츠", x: 680, y: 500, room: "침실" },
-      { id: "obj14", name: "인형", x: 820, y: 470, room: "침실" },
+      { id: "obj1", name: "Cushion", x: 95, y: 170, room: "Living Room" },
+      { id: "obj2", name: "Book", x: 230, y: 230, room: "Living Room" },
+      { id: "obj3", name: "Toy", x: 150, y: 390, room: "Living Room" },
+      { id: "obj4", name: "Remote", x: 240, y: 500, room: "Living Room" },
+      { id: "obj5", name: "Cup", x: 390, y: 120, room: "Kitchen" },
+      { id: "obj6", name: "Plate", x: 520, y: 170, room: "Kitchen" },
+      { id: "obj7", name: "Towel", x: 370, y: 290, room: "Kitchen" },
+      { id: "obj8", name: "Laundry", x: 520, y: 420, room: "Kitchen" },
+      { id: "obj9", name: "Mug", x: 450, y: 520, room: "Kitchen" },
+      { id: "obj10", name: "Pillow", x: 700, y: 130, room: "Bedroom" },
+      { id: "obj11", name: "Socks", x: 820, y: 210, room: "Bedroom" },
+      { id: "obj12", name: "Magazine", x: 760, y: 350, room: "Bedroom" },
+      { id: "obj13", name: "Shirt", x: 680, y: 500, room: "Bedroom" },
+      { id: "obj14", name: "Doll", x: 820, y: 470, room: "Bedroom" },
     ].map((o) => ({ ...o, state: "tidy", r: 12, shake: 0 }));
 
     game.totalObjects = objects.length;
