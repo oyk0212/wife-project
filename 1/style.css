@@ -138,10 +138,10 @@ body {
 
 #joystickBase {
   position: absolute;
-  left: 20px;
-  bottom: 20px;
-  width: 116px;
-  height: 116px;
+  left: 18px;
+  bottom: 16px;
+  width: 132px;
+  height: 132px;
   border-radius: 50%;
   background: rgba(25, 38, 48, 0.35);
   border: 2px solid rgba(255, 255, 255, 0.7);
@@ -151,10 +151,10 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 56px;
-  height: 56px;
-  margin-left: -28px;
-  margin-top: -28px;
+  width: 62px;
+  height: 62px;
+  margin-left: -31px;
+  margin-top: -31px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
   border: 2px solid #344552;
@@ -162,15 +162,15 @@ body {
 
 #messBtn {
   position: absolute;
-  right: 20px;
-  bottom: 30px;
-  width: 110px;
-  height: 110px;
+  right: 18px;
+  bottom: 24px;
+  width: 126px;
+  height: 126px;
   border-radius: 50%;
   border: 2px solid #85271e;
   background: radial-gradient(circle at 35% 30%, #ffb6ad, #df5f54);
   color: white;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
 }
 
@@ -236,20 +236,38 @@ body {
   }
 
   #messBtn {
-    width: 96px;
-    height: 96px;
-    font-size: 16px;
+    width: 118px;
+    height: 118px;
+    font-size: 18px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   #joystickBase {
-    width: 102px;
-    height: 102px;
+    width: 124px;
+    height: 124px;
+    left: 14px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
   }
 
   #joystickStick {
-    width: 50px;
-    height: 50px;
-    margin-left: -25px;
-    margin-top: -25px;
+    width: 58px;
+    height: 58px;
+    margin-left: -29px;
+    margin-top: -29px;
+  }
+}
+
+@media (max-width: 480px) {
+  #hud {
+    border-radius: 10px;
+  }
+
+  #app {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  #gameCanvas {
+    border-radius: 10px;
   }
 }

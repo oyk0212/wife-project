@@ -17,6 +17,18 @@
     gameOverDistance: 20,
   };
 
+  const RUNTIME = {
+    isMobile: window.matchMedia("(hover: none) and (pointer: coarse)").matches,
+    camera: {
+      x: CONFIG.canvas.width / 2,
+      y: CONFIG.canvas.height / 2,
+      zoom: 1,
+    },
+  };
+  if (RUNTIME.isMobile) {
+    RUNTIME.camera.zoom = 1.7;
+  }
+
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -177,6 +189,8 @@
     game.messyCount = 0;
     game.flashTimer = 0;
     game.lastTime = 0;
+    RUNTIME.camera.x = player.x;
+    RUNTIME.camera.y = player.y;
 
     hideAllOverlays();
     showOverlay(startOverlay);
@@ -228,7 +242,8 @@
   function getWifeSpeedPx() {
     const speedUnit = CONFIG.wife.baseSpeed + (game.angry / 100) * 2.0;
     const burst = wife.burstTimer > 0 ? 1.25 : 1.0;
-    return speedUnit * 60 * burst;
+    const mobileAssist = RUNTIME.isMobile ? 0.9 : 1.0;
+    return speedUnit * 60 * burst * mobileAssist;
   }
 
   function getVisionRadius() {
@@ -241,6 +256,10 @@
 
   function getScanInterval() {
     return CONFIG.wife.scanMax - (game.angry / 100) * (CONFIG.wife.scanMax - CONFIG.wife.scanMin);
+  }
+
+  function getInteractionRadius() {
+    return CONFIG.interactionRadius + (RUNTIME.isMobile ? 16 : 0);
   }
 
   function clamp(v, min, max) {
@@ -363,8 +382,9 @@
     }
 
     const vec = normalize(ix, iy);
-    player.vx = vec.x * CONFIG.player.speed;
-    player.vy = vec.y * CONFIG.player.speed;
+    const speed = CONFIG.player.speed * (RUNTIME.isMobile ? 1.2 : 1.0);
+    player.vx = vec.x * speed;
+    player.vy = vec.y * speed;
 
     if (vec.x !== 0 || vec.y !== 0) {
       player.facing.x = vec.x;
@@ -478,7 +498,8 @@
 
     let picked = null;
     let bestD = Infinity;
-    const radius2 = CONFIG.interactionRadius * CONFIG.interactionRadius;
+    const interactionRadius = getInteractionRadius();
+    const radius2 = interactionRadius * interactionRadius;
 
     for (const obj of objects) {
       if (obj.state !== "tidy") continue;
@@ -541,8 +562,6 @@
   }
 
   function drawMap() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     for (const room of map.rooms) {
       ctx.fillStyle = room.color;
       ctx.fillRect(room.x, room.y, room.w, room.h);
@@ -637,7 +656,8 @@
     if (!game.started || game.ended) return;
 
     let hasNearby = false;
-    const radius2 = CONFIG.interactionRadius * CONFIG.interactionRadius;
+    const interactionRadius = getInteractionRadius();
+    const radius2 = interactionRadius * interactionRadius;
     for (const obj of objects) {
       if (obj.state === "tidy" && dist2(player.x, player.y, obj.x, obj.y) <= radius2) {
         hasNearby = true;
@@ -647,7 +667,7 @@
     if (!hasNearby) return;
 
     ctx.beginPath();
-    ctx.arc(player.x, player.y, CONFIG.interactionRadius, 0, Math.PI * 2);
+    ctx.arc(player.x, player.y, interactionRadius, 0, Math.PI * 2);
     ctx.strokeStyle = "rgba(35, 95, 40, 0.55)";
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 5]);
@@ -660,12 +680,55 @@
   }
 
   function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    if (RUNTIME.isMobile) {
+      applyCameraTransform();
+    }
     drawMap();
     drawObjects();
     drawParticles();
     drawPlayer();
     drawWife();
     drawInteractionHint();
+    ctx.restore();
+
+    if (RUNTIME.isMobile) {
+      drawMobileGuide();
+    }
+  }
+
+  function applyCameraTransform() {
+    const z = RUNTIME.camera.zoom;
+    const tx = canvas.width / 2 - RUNTIME.camera.x * z;
+    const ty = canvas.height / 2 - RUNTIME.camera.y * z;
+    ctx.setTransform(z, 0, 0, z, tx, ty);
+  }
+
+  function updateCamera(dt) {
+    if (!RUNTIME.isMobile) {
+      return;
+    }
+    const z = RUNTIME.camera.zoom;
+    const halfW = canvas.width / (2 * z);
+    const halfH = canvas.height / (2 * z);
+
+    const targetX = clamp(player.x, halfW, CONFIG.canvas.width - halfW);
+    const targetY = clamp(player.y, halfH, CONFIG.canvas.height - halfH);
+    const smoothing = Math.min(1, dt * 8);
+
+    RUNTIME.camera.x += (targetX - RUNTIME.camera.x) * smoothing;
+    RUNTIME.camera.y += (targetY - RUNTIME.camera.y) * smoothing;
+  }
+
+  function drawMobileGuide() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+    ctx.fillRect(10, canvas.height - 34, 250, 24);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 13px Trebuchet MS";
+    ctx.fillText("모바일 확대 모드 ON", 18, canvas.height - 18);
   }
 
   function updateWarning(dt) {
@@ -684,6 +747,7 @@
       updateWife(dt);
       updateObjects(dt);
       updateParticles(dt);
+      updateCamera(dt);
 
       if (interactPressed) {
         tryInteract();
@@ -780,7 +844,7 @@
   function updateTouchVector(clientX, clientY) {
     const dx = clientX - touch.centerX;
     const dy = clientY - touch.centerY;
-    const max = 42;
+    const max = RUNTIME.isMobile ? 50 : 42;
     const len = Math.sqrt(dx * dx + dy * dy);
     let clampedX = dx;
     let clampedY = dy;
@@ -817,6 +881,7 @@
   }
 
   function init() {
+    document.body.classList.toggle("mobile-mode", RUNTIME.isMobile);
     setupDesktopInput();
     setupTouchControls();
     setupUI();
