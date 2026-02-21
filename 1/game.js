@@ -571,16 +571,6 @@
     updateHud();
 
     if (game.messyCount >= game.totalObjects) {
-      startFinalChallenge();
-    }
-  }
-
-  function updateFinalChallenge() {
-    if (!game.finalMode || game.ended) return;
-    const gx = FINAL_CHALLENGE.goal.x;
-    const gy = FINAL_CHALLENGE.goal.y;
-    const winDist = FINAL_CHALLENGE.goal.r + player.radius;
-    if (dist2(player.x, player.y, gx, gy) <= winDist * winDist) {
       setWin();
     }
   }
@@ -834,8 +824,6 @@
       updateObjects(dt);
       updateParticles(dt);
       updateCamera(dt);
-      updateFinalChallenge();
-
       if (interactPressed) {
         tryInteract();
         interactPressed = false;
