@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wife Project - Comic Stealth</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-row">
+        <div class="label">ANGRY</div>
+        <div class="bar-wrap" aria-label="angry gauge">
+          <div id="angryBar"></div>
+        </div>
+        <div id="angryValue">0</div>
+      </div>
+      <div class="hud-row second">
+        <div id="progressText">0/12</div>
+        <div id="stateText" class="state patrol">PATROL</div>
+      </div>
+    </header>
+
+    <main id="gameArea">
+      <canvas id="gameCanvas" width="900" height="600" aria-label="Wife Project game"></canvas>
+
+      <div id="mobileControls" aria-hidden="true">
+        <div id="joystickBase">
+          <div id="joystickStick"></div>
+        </div>
+        <button id="messBtn" type="button">어지르기</button>
+      </div>
+
+      <div id="warningFlash"></div>
+
+      <section id="startOverlay" class="overlay show">
+        <h1>Wife Project</h1>
+        <p>가상 스텔스 시뮬레이션: 들키기 전에 모든 오브젝트를 어질러 보세요.</p>
+        <ul>
+          <li>이동: WASD / 모바일 조이스틱</li>
+          <li>상호작용: E / 어지르기 버튼</li>
+          <li>아내에게 발각되거나 가까이 붙으면 게임 오버</li>
+        </ul>
+        <button id="startBtn" type="button">게임 시작</button>
+      </section>
+
+      <section id="gameOverOverlay" class="overlay">
+        <h2>Game Over</h2>
+        <p>아내에게 발각되었습니다.</p>
+        <button id="restartBtn1" type="button">재시작</button>
+      </section>
+
+      <section id="winOverlay" class="overlay">
+        <h2>You Win!</h2>
+        <p>모든 오브젝트를 어질렀습니다.</p>
+        <div class="win-actions">
+          <button id="restartBtn2" type="button">재시작</button>
+          <button id="copyBtn" type="button">공유 문구 복사</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

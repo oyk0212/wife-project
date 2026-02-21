@@ -1,0 +1,255 @@
+:root {
+  --bg-1: #f4f2e8;
+  --bg-2: #d8e6f5;
+  --panel: rgba(255, 255, 255, 0.88);
+  --text: #1d2a34;
+  --danger: #c43a2f;
+  --danger-2: #f1695f;
+  --accent: #1f7f5f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Trebuchet MS", "Noto Sans KR", sans-serif;
+  color: var(--text);
+}
+
+body {
+  background: radial-gradient(circle at 25% 20%, var(--bg-2), var(--bg-1) 70%);
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  min-height: 100%;
+}
+
+#hud {
+  width: min(920px, 100%);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(12, 18, 22, 0.12);
+}
+
+.hud-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-row.second {
+  margin-top: 8px;
+  justify-content: space-between;
+}
+
+.label {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.bar-wrap {
+  flex: 1;
+  height: 16px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #9b9b9b;
+  background: #f1f1f1;
+}
+
+#angryBar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger-2), var(--danger));
+  transition: width 0.14s linear;
+}
+
+#angryValue,
+#progressText,
+#stateText {
+  font-weight: 700;
+}
+
+.state {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #47525c;
+}
+
+.state.patrol {
+  background: #e8f2ff;
+}
+
+.state.chase {
+  background: #ffe3e0;
+  color: #8e251d;
+  border-color: #8e251d;
+}
+
+#gameArea {
+  width: min(920px, 100%);
+  position: relative;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  border: 2px solid #2f3d4a;
+  background: #cfc3a3;
+  box-shadow: 0 12px 30px rgba(20, 24, 28, 0.2);
+  touch-action: none;
+}
+
+#warningFlash {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 6px solid rgba(214, 44, 32, 0);
+  pointer-events: none;
+  transition: border-color 0.1s linear;
+}
+
+#warningFlash.show {
+  border-color: rgba(214, 44, 32, 0.9);
+}
+
+#mobileControls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#joystickBase,
+#messBtn {
+  pointer-events: auto;
+}
+
+#joystickBase {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: rgba(25, 38, 48, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+#joystickStick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  margin-top: -28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #344552;
+}
+
+#messBtn {
+  position: absolute;
+  right: 20px;
+  bottom: 30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 2px solid #85271e;
+  background: radial-gradient(circle at 35% 30%, #ffb6ad, #df5f54);
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(9, 14, 17, 0.65);
+  color: #fff;
+  border-radius: 14px;
+}
+
+.overlay h1,
+.overlay h2,
+.overlay p,
+.overlay ul {
+  margin: 0;
+}
+
+.overlay ul {
+  list-style: none;
+  padding: 0;
+  line-height: 1.5;
+}
+
+.overlay button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  color: #193048;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.win-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #mobileControls {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  #hud {
+    padding: 8px 10px;
+  }
+
+  #messBtn {
+    width: 96px;
+    height: 96px;
+    font-size: 16px;
+  }
+
+  #joystickBase {
+    width: 102px;
+    height: 102px;
+  }
+
+  #joystickStick {
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+  }
+}
