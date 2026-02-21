@@ -898,12 +898,14 @@
 
       const activate = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         touchMove[dir] = true;
         btn.classList.add("active");
         ensureAudioContext();
       };
       const deactivate = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         touchMove[dir] = false;
         btn.classList.remove("active");
       };
@@ -916,8 +918,13 @@
 
     messBtn.addEventListener("pointerdown", (e) => {
       e.preventDefault();
+      e.stopPropagation();
       interactPressed = true;
       ensureAudioContext();
+    });
+    messBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
     });
   }
 
